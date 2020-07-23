@@ -1,0 +1,904 @@
+---
+title: "Unspervised_Learning"
+author: "datagulf"
+date: "18/07/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 1. Problem Definition
+
+This is will help us understand the task at hand, the dataset to be used and the metrics of Success.
+
+### a. Specifying the question.
+Kira Plastinina is a Russian brand that is sold through a defunct chain of retail stores in Russia, Ukraine, Kazakhstan, Belarus, China, Philippines, and Armenia. The brand’s Sales and Marketing team would like to understand their customer’s behavior from data that they have collected over the past year. More specifically, they would like to learn the characteristics of customer groups. 
+
+1. Perform clustering stating insights drawn from your analysis and visualizations.
+
+2. Upon implementation, we will provide comparisons between K-Means clustering vs Hierarchical clustering highlighting the strengths and limitations of each approach in the context of our analysis. 
+ 
+### b. Define the Metrics of Success.
+Our metrics of Success is finding conclusive conclusions from the data to know which individuals are more likely to click on her ads.
+
+### c. Understand context
+The context is using data to do Exploratory Data Analysis to get meaningful insights and conclusions from advertising data.
+
+### d. Record the experiment design 
+This involves:
+a. Cleaning
+   i). Removing anomalies in the data
+  ii). Finding and dealing with missing data
+ iii). Dealing with duplicated rows in the data
+ 
+b. Exploratory Data Analysis
+   i). Univariate analysis
+  ii). Bivariate analysis
+ iii). Multivariate analysis
+ 
+c. Perform 
+   i).K-clustering   
+  ii).Hierarchical clustering
+ iii).DBSCAN Clustering
+### e. Data relevance
+To establish if the data is relevant to the question and the objectives of the experiment.
+
+## 2. Read Data
+  We start by importing the Data
+```{r}
+install.packages("data.table")
+library(data.table)
+````
+
+
+```{r}
+customer <- read.csv('http://bit.ly/EcommerceCustomersDataset')
+head(customer)
+```
+
+### Inspect the data
+Problem Definition
+Data Sourcing
+Check the Data
+Perform Data Cleaning
+Perform Exploratory Data Analysis  (Univariate, Bivariate & Multivariate)
+Implement the Solution
+Challenge the Solution
+Follow up Questions
+
+You can also embed plots, for example:
+
+### Check the data
+```{r}
+head(customer)
+```
+Inspect the data last 6 entries to check for the data consistency
+```{r}
+tail(customer)
+```
+Check for the columns
+```{r}
+colnames(customer)
+```
+
+
+
+Check the summaries of the data
+```{r}
+summary(customer)
+
+````
+These summaries are not well organized.
+```{r}
+admin <- customer$'Administrative'
+admind <- customer$'Administrative_Duration'
+info <- customer$'Informational'
+infod <- customer$'Informational_Duration'
+product <- customer$'ProductRelated'
+productd <- customer$'ProductRelated_Duration'
+bounce <- customer$'BounceRates'
+exit <- customer$'ExitRates'
+page <- customer$'PageValues'
+special <- customer$'SpecialDay'
+month <- customer$'Month'
+operating <- customer$'OperatingSystems'
+browse <- customer$'Browser'
+region <- customer$'Region'
+traffic <- customer$'TrafficType'
+visitor <- customer$'VisitorType'
+weekend <- customer$'Weekend'
+rev <- customer$'Revenue'
+````
+
+
+```{r}
+summary(admin)
+#The minimum is o and the maximum is 27, The column also has 14 Na's
+```
+```{r}
+summary(admind)
+#The minimum is -1 and the maximum is 3398, The mean is 80.91 .The mean is far from the maximum so we will check for outliers.
+#The column also has 14 Na's
+```
+```{r}
+summary(info)
+##The minimum is 0 and the maximum is 24, The mean is 0.504 .The mean is far from the maximum so we will check for outliers.
+#The column also has 14 Na's
+```
+
+```{r}
+summary(infod)
+##The minimum is -1 and the maximum is 2549.38, The mean is 34.51 .The mean is far from the maximum so we will check for outliers.
+#The column also has 14 Na's
+```
+```{r}
+summary(productd)
+##The minimum is -1 and the maximum is 63973.5 , The mean is 1196 .The mean is far from the maximum so we will check for outliers.
+#The column also has 14 Na's
+```
+
+```{r}
+summary(product)
+##The minimum is 0 and the maximum is 705 , The mean is 31.96 .The mean is far from the maximum so we will check for outliers.
+#The column also has 14 Na's
+```
+
+
+```{r}
+summary(bounce)
+##The minimum is 0 and the maximum is 2 , The mean is 0.02 .The mean is far from the maximum so we will check for outliers.
+#The column also has 14 Na's
+```
+
+
+```{r}
+summary(exit)
+##The minimum is 0 and the maximum is 2 , The mean is 0.02 .The mean is far from the maximum so we will check for outliers.
+#The column also has 14 Na's
+```
+
+```{r}
+summary(page)
+##The minimum is 0 and the maximum is 361.764 , The mean is 5.888 .The mean is far from the maximum so we will check for outliers.
+#The column also has 14 Na's
+
+```
+
+```{r}
+summary(special)
+##The minimum is 0 and the maximum is 1 , The mean is 0.06143 .The mean is far from the maximum so we will check for outliers.
+#The column also has 14 Na's
+```
+
+```{r}
+summary(month)
+# contains 12330 characters 
+
+```
+
+```{r}
+summary(operating)
+##The minimum is 0 and the maximum is 8 , The mean is 2.124 .The mean is far from the maximum so we will check for outliers.
+
+```
+
+```{r}
+summary(browse)
+##The minimum is 1 and the maximum is 13 , The mean is 2.357 .The mean is far from the maximum so we will check for outliers.
+
+```
+
+```{r}
+summary(region)
+##The minimum is 1 and the maximum is 9 , The mean is 3.147 .The mean is far from the maximum so we will check for outliers.
+```
+
+```{r}
+summary(traffic)
+##The minimum is 1 and the maximum is 20.00 , The mean is 4.07 .The mean is far from the maximum so we will check for outliers.
+```
+
+```{r}
+summary(weekend)
+# contains categorical data.
+
+```
+
+```{r}
+summary(visitor)
+# contains 12330 characters 
+```
+
+
+```{r}
+summary(rev)
+# contains categorical data.
+```
+check for the structure
+```{r}
+str(customer)
+```
+Check the dimension
+```{r}
+dim(customer)
+ #our data has 12330 Columns and 18 rows
+
+```
+Check the class
+
+```{r}
+class(customer)
+# The customer data is a data.frame
+```
+
+## Clean the data
+#### We need to ensure that our data does not any inconsitencies. It may look clean but we will  perform procedures to ensure it clean.The procedures are:
+##### 1. Find missing data
+##### 2. Locate and get rid of ourliers
+##### 3. Find duplicated rows and deal with them
+### 1. Find Missing data
+##### Missing data is any data in a data fram that contains either , Na , NaN or a blank space. 
+
+```{r}
+colnames(customer)
+```
+
+```{r}
+
+# We will do this for each variable
+#i) . Number of missing data in area_income variable
+admin1 <- length(which(!is.na(admin)))
+admin1
+```
+
+```{r}
+admind1 <- length(which(!is.na(admind)))
+admind1
+````
+
+
+```{r}
+info1 <- length(which(!is.na(info)))
+info1
+```
+
+```{r}
+infod1 <- length(which(!is.na(infod)))
+infod1
+
+```
+
+
+```{r}
+product1 <- length(which(!is.na(product)))
+product1
+
+```
+
+
+```{r}
+productd1 <- length(which(!is.na(productd)))
+productd1
+
+```
+
+```{r}
+bounce1 <- length(which(!is.na(bounce)))
+bounce1
+
+```
+
+
+```{r}
+exit1 <- length(which(!is.na(exit)))
+exit1
+
+```
+
+
+```{r}
+page1 <- length(which(!is.na(page)))
+page1
+
+```
+
+```{r}
+special1 <- length(which(!is.na(special)))
+special1
+
+```
+
+```{r}
+month1 <- length(which(!is.na(month)))
+month1
+
+```
+
+
+```{r}
+
+operating1 <- length(which(!is.na(operating)))
+operating1
+```
+
+
+```{r}
+browse1 <- length(which(!is.na(browse)))
+browse1
+
+```
+
+```{r}
+region1 <- length(which(!is.na(region)))
+region1
+
+```
+
+
+```{r}
+traffic1 <- length(which(!is.na(admin)))
+traffic1
+
+```
+
+
+```{r}
+visitor1 <- length(which(!is.na(visitor)))
+visitor1
+
+```
+
+
+````{r}
+weekend1 <- length(which(!is.na(weekend)))
+weekend1
+
+```
+
+
+````{r}
+rev1 <- length(which(!is.na(rev)))
+rev1
+
+
+```
+
+
+### 2. Outliers
+ We are going to use Boxplots. Boxplots are really helpful.From a  boxplot we get outliers using the normal distribution. For a normal distribution the Mean and median should be very near to each other. Having very far off Mean and median values means that that variable or data is skewed.THis image shows a labelled Boxplot.
+<https://tinyurl.com/y5szsur8>
+
+
+```{r}
+boxplot(admin)
+
+```` 
+```{r}
+boxplot(admind)
+
+````
+
+
+```{r}
+boxplot(info)
+```
+
+````{r}
+boxplot(infod)
+````
+
+```{r}
+boxplot(product)
+```
+
+```{r}
+boxplot(productd)
+```
+
+```{r}
+boxplot(exit)
+```
+
+```{r}
+boxplot(page)
+```
+
+```{r}
+boxplot(special)
+```
+
+```{r}
+boxplot(browse)
+```
+
+```{r}
+boxplot(traffic)
+```
+
+```{r}
+boxplot(rev)
+```
+ This shows the boxplots , however , having dropped the missing values. We have got rid of the 
+the outliers too. 
+
+### 3. Duplicates
+
+#### For data to qualify to be duplicated , there has to be identical row Items more than once
+```{r}
+customer1  = customer[!duplicated(customer),]
+customer1
+```
+
+
+## Exploratory Data Analysis
+#### exploratory data analysis is an approach to analyzing data sets to summarize their main characteristics, often with visual methods. A statistical model can be used or not, but primarily EDA is for seeing what the data can tell us beyond the formal modeling or hypothesis testing task
+
+###  1.Measures of Central Tendency. 
+##### a. Mean
+#### We have extensively checked at Mean in the Summaries
+
+##### b.median.
+#### We have extensively checked at Median values in the Summaries
+
+##### c.Mode
+#### R - does not have an inbuilt R code for mode. Hence we will create our own function.
+
+```{r}
+getmode <- function(v){
+  uniqv <- unique(v)
+  uniqv[which.max(tabulate(match(v ,uniqv)))]
+}
+```
+
+```{r}
+#i. Find the mode admin1
+mode_admin1 <- getmode(admin)
+mode_admin1
+# The most common  admin1 was 12316
+```
+
+```{r}
+#i1. Find the mode admind1
+mode_admind1 <- getmode(admind)
+mode_admind1
+# The most common admind1 was 12316
+```
+
+```{r}
+#iii. Find the mode info1
+mode_info1 <- getmode(info)
+mode_info1
+# The most common info1 was 12316
+```
+
+
+```{r}
+#iv. Find the mode product1
+mode_product <- getmode(product)
+mode_product
+# The most common product was 12316
+```
+
+```{r}
+#v. Find the mode exit
+mode_exit1 <- getmode(exit)
+mode_exit1
+# The most common exit is 0.2
+```
+
+```{r}
+#vi. Find the mode page
+mode_page <- getmode(page)
+mode_page
+# The most common page was 0
+```
+
+```{r}
+#vii. Find the mode special
+mode_special <- getmode(special)
+mode_special
+# The most common special was 0
+```
+
+```{r}
+#viii. Find the mode operating
+mode_operating1 <- getmode(operating)
+mode_operating1
+# The most common operating was 2
+```
+
+```{r}
+#ix. Find the mode month
+mode_month <- getmode(month)
+mode_month
+# The most common month was May
+```
+
+```{r}
+#x. Find the mode browse
+mode_browse <- getmode(browse)
+mode_browse
+# The most common browse was 2
+```
+
+```{r}
+#xi. Find the mode region
+mode_region <- getmode(region)
+mode_region
+# The most common region was 1
+```
+
+```{r}
+#xii. Find the mode traffic
+mode_traffic <- getmode(traffic)
+mode_traffic
+# The most common traffic was 2
+```
+
+```{r}
+#xiii. Find the mode visitor
+mode_visitor <- getmode(visitor)
+mode_visitor
+# The most common visitor was "Returning_Visitor"
+```
+
+```{r}
+#xiv. Find the mode weekend
+mode_weekend <- getmode(weekend)
+mode_weekend
+# The most common weekend was "FALSE"
+```
+
+```{r}
+#xv. Find the mode rev
+mode_rev <- getmode(rev)
+mode_rev
+# The most common rev was "FALSE"
+```
+## Bivariate and multivariate analysis
+#### this will handle the relationships of data among  categorical variables. We will use density plots, scatter plots
+#### 1. Categorical and continuous variables
+#### Relationship between clicked and area Income
+
+
+```{r}
+by(admin, rev, summary)
+
+# This shows the breakdown of the clicked in terms of the area income. 
+# we notice those who clicked had a lower minimum area income to those who did not click. 
+#Also there was a mean difference of around 12000 betweenthose who clicked and those who did not.
+# the maximums are almost the same.
+```
+
+```{r}
+by(info, rev, summary)
+```
+
+
+```{r}
+by(product, rev, summary)
+```
+
+```{r}
+by(productd, rev, summary)
+```
+
+```{r}
+by(exit, rev, summary)
+```
+
+```{r}
+by(page, rev, summary)
+```
+
+```{r}
+by(operating, rev, summary)
+```
+
+```{r}
+by(traffic, rev, summary)
+```
+
+```{r}
+by(visitor, rev, summary)
+```
+```{r}
+by(weekend, rev, summary)
+```
+
+
+```{r}
+boxplot(admin ~ rev, col = c("blue", "red") , main ="admnistrative  vs revenue")
+
+```
+
+```{r}
+boxplot(admin ~ rev, col = c("green", "white") , main ="admnistrative duration  vs revenue")
+```
+
+
+
+
+```{r}
+boxplot(product ~ rev, col = c("green", "red") , main ="product vs revenue")
+```
+
+```{r}
+boxplot(exit ~ rev, col = c("green", "orange") , main ="exit vs revenue")
+```
+
+```{r}
+boxplot(special ~ rev, col = c("white", "red") , main ="product vs revenue")
+```
+
+```{r}
+boxplot(special ~ rev, col = c("purple", "blue") , main ="special vs revenue")
+```
+
+```{r}
+boxplot(weekend ~ rev, col = c("white", "blue") , main ="weekend vs revenue")
+```
+
+```{r}
+library(ggplot2)
+ggplot(customer, aes(admin, colour = rev)) +
+geom_freqpoly(binwidth = 1) + labs(title="admin  by rev")
+
+```
+
+
+```{r}
+ggplot(customer, aes(info, colour = rev)) +
+geom_freqpoly(binwidth = 1) + labs(title="information vs Revenue")
+
+```
+
+
+```{r}
+ggplot(customer, aes(product, colour = rev)) +
+geom_freqpoly(binwidth = 1) + labs(title="product vs revenue")
+
+```
+
+
+```{r}
+ggplot(customer, aes(exit, colour = rev)) +
+geom_freqpoly(binwidth = 1) + labs(title="exit vs revenue")
+
+```
+
+
+```{r}
+ggplot(customer, aes(page, colour = rev)) +
+geom_freqpoly(binwidth = 1) + labs(title="page vs Revenue")
+
+```
+
+
+```{r}
+ggplot(customer, aes(browse, colour = rev)) +
+geom_freqpoly(binwidth = 1) + labs(title="browse vs rev")
+
+```
+
+
+```{r}
+ggplot(customer, aes(traffic, colour = rev)) +
+geom_freqpoly(binwidth = 1) + labs(title="Age Distribution by Click")
+
+```
+
+
+```{r}
+ggplot(customer, aes(productd, colour = rev)) +
+geom_freqpoly(binwidth = 1) + labs(title="Product Duration vs Revenue")
+
+```
+## 6. Implement the Solution
+
+```{r}
+# Since clustering is a type of Unsupervised Learning, 
+# we would not require Class Label(output) during execution of our algorithm. 
+# We will, therefore, remove Class Attribute “Species” and store it in another variable. 
+# We would then normalize the attributes between 0 and 1 using our own function.
+# ---
+#
+customer.new<- customer1[, c(1, 2, 3, 4,5,6,7,8,9,10,12,13,14,15,16,17)]
+customer.class<-customer[,"Revenue"]
+head(customer.new)
+
+```
+
+
+```{r}
+# Normalizing the dataset so that no particular attribute 
+# has more impact on clustering algorithm than others.
+# ---
+# 
+normalize <- function(x){
+  return ((x-min(x)) / (max(x)-min(x)))
+}
+
+```
+
+
+```{r}
+admin1<- normalize(admin)
+admind1<- normalize(admind)
+info1<- normalize(info)
+infod1<-normalize(infod)
+product1<-normalize(product)
+productd1<-normalize(productd)
+exit1<-normalize(exit)
+page1<-normalize(page)
+special1<- normalize(special)
+#month1<- normalize(month)
+operating1<- normalize(operating)
+browse1<- normalize(browse)
+region1<- normalize(region)
+traffic1<- normalize(traffic)
+#vistor1<- normalize(visitor)
+weekend1 <- normalize(weekend)
+```
+
+
+```{r}
+customer.new <- na.omit(customer.new)
+```
+
+```{r}
+# Applying the K-means clustering algorithm with no. of centroids(k)=10
+# ---
+# 
+result<- kmeans(customer.new,10) 
+
+# Previewing the no. of records in each cluster
+# 
+result$rev
+
+
+```
+
+
+```{r}
+# Getting the value of cluster center datapoint value(3 centers for k=3)
+# ---
+# 
+result$centers 
+
+
+```
+
+
+
+
+
+```
+### 2 . Hierarchical clustering
+
+
+```{r}
+customer1 <- scale(customer)
+head(customer1)
+```
+
+
+```{r}
+d <- dist(df, method = "euclidean")
+
+# We then hierarchical clustering using the Ward's method
+# ---
+# 
+res.hc <- hclust(d, method = "ward.D2" )
+
+
+```
+
+
+```{r}
+# Lastly, we plot the obtained dendrogram
+# ---
+# 
+plot(res.hc, cex = 0.6, hang = -1)
+
+
+```
+
+DBSCAN Clustering
+```{r}
+m1<-m[,c(1,2,3,4)]
+head()
+
+
+```
+
+
+```{r}
+# Applying our DBSCAN algorithm
+# ---
+# We want minimum 4 points with in a distance of eps(0.4)
+# 
+db<-dbscan(m1,eps=0.4,MinPts = 4)
+
+```
+
+
+```{r}
+# Printing out the clustering results
+# ---
+# 
+print(db)
+```
+
+
+```{r}
+# We also plot our clusters as shown
+# ---
+# The dataset and cluster method of dbscan is used to plot the clusters.
+# 
+hullplot(m1,db$cluster)
+```
+
+
+```{r}
+
+```
+
+
+```{r}
+
+```
+
+
+```{r}
+
+```
+
+
+
+```{r}
+
+```
+
+
+```{r}
+
+```
+
+
+```{r}
+
+```
+
+
+```{r}
+
+```
+
+
+```{r}
+
+```
+
+
+```{r}
+
+```
+
+
+```{r}
+
+```
+
+
+```{r}
+
+```
+
+
+```{r}
+
+```
+

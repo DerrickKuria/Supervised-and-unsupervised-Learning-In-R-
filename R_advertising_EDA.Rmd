@@ -1,0 +1,801 @@
+---
+title: "Advertising"
+author: "datagulf"
+date: "18/07/2020"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 1. Define the Question
+
+This is will help us understand the task at hand, the dataset to be used and the metrics of Success.
+
+### a. Specifying the question.
+ A Kenyan entrepreneur has created an online cryptography course and would want to advertise it on her blog. She currently targets audiences originating from various countries. In the past she rans ads to advertise a related course on the same blog and collected data in the process. She would like to employ your services  as a data science Consultant (Datagulf), to help her develop her identity which individuals are most likely to click on her ads. 
+ 
+### b. Define the Metrics of Success.
+Our metrics of Success is finding conclusive conclusions from the data to know which individuals are more likely to click on her ads.
+
+### c. Understand context
+The context is using data to do Exploratory Data Analysis to get meaningful insights and conclusions from advertising data.
+
+### d. Record the experiment design 
+This involves:
+a. Cleaning
+   i). Removing anomalies in the data
+  ii). Finding and dealing with missing data
+ iii). Dealing with duplicated rows in the data
+ 
+b. Exploratory Data Analysis
+   i). Univariate analysis
+  ii). Bivariate analysis
+ iii). Multivariate analysis 
+ 
+c. Create Models
+   i). SVM
+  ii). KNN
+ iii). Regression
+  iv). Naive Regression
+   v). Decision Trees
+ 
+ 
+### e. Data relevance
+To establish if the data is relevant to the question and the objectives of the experiment.
+
+## 2. Read Data
+#### We start by importing the Data
+ 
+```{r eval=FALSE, include=FALSE}
+advert <- read.csv('http://bit.ly/IPAdvertisingData')
+head(advert)
+```
+
+#### Inspect the data first 6 entries. 
+
+
+```{r}
+head(advert)
+```
+
+#### Inspect the data last 6 entries to check for the data consistency
+```{r}
+tail(advert)
+```
+
+
+## 3. Check the data 
+
+#### we will do a few R codes to get summaries of the data 
+### a. Summary
+```{r}
+summary(advert)
+```
+#### We realise these summaries are not well arranged hence we will do for each variable.
+```{r}
+time <- advert$'Daily.Time.Spent.on.Site'
+age <- advert$Age
+area_income <- advert$Area.Income
+daily_internet <- advert$Daily.Internet.Usage
+click <- advert$Clicked.on.Ad
+country <-advert$Country
+male <-advert$Male
+city <-advert$City
+male <-advert$Male
+timestamp <-advert$Ad.Topic.Line
+```
+
+
+#### Now we can check summaries of the specific data variables of the advertising data
+
+```{r}
+#a. Summary of time
+summary(time)
+#From this we realize the Mean time spent on the site was 65 units.
+#The maximum time spent on the site is 91.43 units
+#The minimum time spent on the site is 32.60 units
+
+```
+```{r}
+#b. Summary Age
+summary(age)
+#From this we realize the Mean age of the people on the site was36 years.
+#The maximum age of the people on the site is 61 years
+#The minimum age of the people on the site is 19 years
+```
+```{r}
+#c. Summary Area Income
+summary(area_income)
+#From this we realize the Mean area income is 55000 units.
+#The maximum area income  is 79485 units
+#The minimum area income  is 13996 units
+```
+```{r}
+#d.Summary  Daily internet
+summary(daily_internet)
+#From this we realize the Mean daily internet is 180 units
+#The maximum  Mean daily internet is 270.0 units
+#The minimum  Mean daily internet is 104.8 units
+```
+```{r}
+#e. Summary Click 
+summary(click)
+#From this we realize the Mean clicks is 0.5( hence from the data, the ones who clicked and did not click is almost half half)
+#The value to show a click is 1.0
+#The value to not show a click is 0.0
+```
+### b. View the information and Data types of the data(structure)
+```{r}
+str(advert)
+```
+
+ we notice that our label data(Click on Ad) is in int(integer form)whereas it is a factor variable( categorical variable). We need to change this.
+```{r}
+#We will use as factor to change the daa type from Integer to Factor
+advert$Clicked.on.Ad <- as.factor(advert$Clicked.on.Ad)
+
+```
+
+##### Lets inspect the change in the data.
+```{r}
+str(advert)
+```
+#### Also for the male variable(one of the independent variables) is also in integer whereas it should be a factor. 
+```{r}
+advert$Male <- as.factor(advert$Male)
+```
+
+#### Inspect the change in the male variable.
+
+```{r}
+str(advert)
+```
+
+#### the changes have been effected. 
+
+### c. Check for the Shape(dimension) of the data (rows and columns) using dim
+
+```{r}
+dim(advert)
+# We can observe that the data is 1000 rows and 10 columns.
+#This is a good amount of data to perform analysis of the site to determine who is likely to click the ads
+```
+### d. Check the Class of data. ( We hope it is in a data.frame as we have observed above in the structure(str))
+```{r}
+class(advert)
+#For sure it is a data.frame.
+```
+### e. Inspect the column names
+```{r}
+colnames(advert)
+```
+
+# 4. Clean the data
+#### We need to ensure that our data does not any inconsitencies. It may look clean but we will  perform procedures to ensure it clean.The procedures are:
+##### 1. Find missing data
+##### 2. Locate and get rid of ourliers
+##### 3. Find duplicated rows and deal with them
+
+
+### 1. Find Missing data
+##### Missing data is any data in a data fram that contains either , Na , NaN or a blank space. 
+```{r}
+# We will do this for each variable
+#i) . Number of missing data in area_income variable
+missing_data_area_income <- length(which(is.na(area_income)))
+missing_data_area_income
+
+#area income does not have missing data
+```
+```{r}
+
+#ii) . Number of missing data in click variable
+missing_data_click <- length(which(is.na(click)))
+missing_data_click
+#Click data does not have missing data
+```
+
+```{r}
+
+#iii) . Number of missing data in time variable
+missing_data_time <- length(which(is.na(time)))
+missing_data_time
+
+#Time does not have missing data
+```
+```{r}
+
+#iv) . Number of missing data in daily_internet variable
+missing_data_daily_internet<- length(which(is.na(daily_internet)))
+missing_data_daily_internet
+
+#daily_internet does not have missing data
+``` 
+
+```{r}
+
+#v) . Number of missing data in age variable
+missing_data_age<- length(which(is.na(age)))
+missing_data_age
+
+#age does not have missing data
+``` 
+
+```{r}
+
+#vi) . Number of missing data in country variable
+missing_data_country<- length(which(is.na(country)))
+missing_data_country
+
+#country does not have missing data
+``` 
+
+
+
+```{r}
+
+#vii) . Number of missing data in male variable
+missing_data_male<- length(which(is.na(male)))
+missing_data_male
+
+#male does not have missing data
+``` 
+
+
+
+```{r}
+
+#viii) . Number of missing data in city variable
+missing_data_city<- length(which(is.na(city)))
+missing_data_city
+
+#city does not have missing data
+``` 
+
+
+
+##### From this Data , we can observe that there was no missing data from the dataset.
+
+### 2. Outliers
+##### We are going to use Boxplots. Boxplots are really helpful.From a  boxplot we get outliers using the normal distribution. For a normal distribution the Mean and median should be very near to each other. Having very far off Mean and median values means that that variable or data is skewed.THis image shows a labelled Boxplot.
+<https://tinyurl.com/y5szsur8>
+````{r}
+boxplot(age)
+#this shows that the data in variable age is distributed and does not have outliers.
+
+```
+```{r}
+boxplot(click)
+#This is the dependent variable.it is categorical and is 1 or 0 to show those who clicked and those who did not click the ads.
+```
+```{r}
+boxplot(daily_internet)
+#Daily_internet does not have any outliers. Its data is normally distributed.
+```
+```{r}
+boxplot(male)
+#Male is a categorical column hence,which has values 0 and 1 , hence it is unlikely for it to have outliers
+```
+```{r}
+boxplot(time)
+# the variable does not have  any outliers. It also shows a normal distribution
+```
+
+### 3. Dealing with Duplicates
+#### For data to qualify to be duplicated , there has to be identical row Items more than once.
+
+```{r}
+duplicated_all  = advert[duplicated(advert),]
+duplicated_all
+#From the data , none of the columns shows duplication
+```
+
+## 4. EXploratory Data Analysis
+
+#### exploratory data analysis is an approach to analyzing data sets to summarize their main characteristics, often with visual methods. A statistical model can be used or not, but primarily EDA is for seeing what the data can tell us beyond the formal modeling or hypothesis testing task
+
+###  1.Measures of Central Tendency. 
+##### a. Mean
+#### We have extensively checked at Mean in the Summaries
+
+##### b.median.
+#### We have extensively checked at Median values in the Summaries
+
+##### c.Mode
+#### R - does not have an inbuilt R code for mode. Hence we will create our own function.
+```{r}
+getmode <- function(v){
+  uniqv <- unique(v)
+  uniqv[which.max(tabulate(match(v ,uniqv)))]
+}
+```
+
+
+```{r}
+#i. Find the mode age
+mode_age <- getmode(age)
+mode_age
+# The most common age was 31
+```
+
+```{r}
+#ii).Find the mode Daily internet
+mode_daily_internet <- getmode(daily_internet)
+mode_daily_internet
+
+#The daily internet mode is 167.22 units
+
+```
+
+```{r}
+#iii). Find the mode Area income
+mode_area_income <- getmode(area_income)
+mode_area_income
+#The  area income mode is 61833.9
+
+```
+
+```{r}
+
+#iv).Find the mode of time
+mode_time <- getmode(time)
+mode_time
+#The most common time was 62.26
+```
+
+### Show data distributions
+```{r}
+hist(age)
+#the histogram data backs the mode function for agge to show that most of the people on the dataset were likely to be 31 years of age.
+```
+
+```{r}
+#Area income Histogram
+hist(area_income) 
+#The data is skewed to the right. Histogram resonates with our mode of 61833.9
+```
+```{r}
+#Histogram for Daily internet
+hist(daily_internet)
+```
+
+```{r}
+hist(time)
+```
+### b. Dispersion of the data
+
+```{r}
+#Spread of Age
+plot(density(age), main = 'Age density spread')
+
+```
+
+
+
+
+```{r}
+#Spread of Daily internet
+plot(density(daily_internet), main = 'Daily internet density spread')
+```
+
+
+
+```{r}
+#Spread of area_income
+plot(density(area_income), main = 'area_income density spread')
+
+```
+
+
+```{r}
+#Spread of time
+plot(density(time), main = 'time density spread')
+```
+
+
+```{r}
+#bar chart for the Categorical variables
+plot(click, main ="Those who clicked and didn't")
+```
+
+```{r}
+pie(table(click), "Click vs Did not click")
+``` 
+
+```{r}
+
+```
+## Bivariate and multivariate analysis
+#### this will handle the relationships of data among  categorical variables. We will use density plots, scatter plots
+#### 1. Categorical and continuous variables
+#### Relationship between clicked and area Income
+
+
+
+```{r}
+        
+by(area_income, click, summary)
+
+# This shows the breakdown of the clicked in terms of the area income. 
+# we notice those who clicked had a lower minimum area income to those who did not click. 
+#Also there was a mean difference of around 12000 betweenthose who clicked and those who did not.
+# the maximums are almost the same.
+```
+
+```{r}
+
+by(daily_internet, click , summary)
+#those who clicked the ads had lower mean of internet compared to those who did not click the ads
+#There is also a significant value in the difference of the daily internet of those who clicked and those who did not
+```
+
+```{r}
+by(area_income , male , summary)
+#For male and female , there is almost the same representation of the area income
+
+```
+
+```{r}
+by(daily_internet , male , summary)
+
+# From the summaries thereis almost an equa representation of the daily internet by gender.
+
+
+```
+
+```{r}
+
+boxplot(area_income~click, col = c("grey", "red") , main ="Area Income among click or not")
+# We can view that those who did  not click have a higher area incomethan those who did not click
+```
+
+```{r}
+boxplot(daily_internet~click, col = c("grey", "green") , main ="Daily internet among clicked or not")
+# Those who did not click seem to be a bit older
+```
+
+```{r}
+boxplot(age~click, col = c("grey", "blue") , main ="age among clicked or not")
+
+```
+
+```{r}
+boxplot(daily_internet~male, col = c("orange", "white") , main ="Daily internet among clicked or not")
+
+# There is almost parity in gender
+```
+
+## 6. Models
+####1. SVM
+```{r}
+##Support vector machine (abbreviated as SVM) is a supervised learning algorithm often used in classification.
+# We first install the caret package. 
+# This package will be very helfpul in providing us with 
+# direct access to various functions for training our model
+install.packages('caret')
+```
+#### Since this is Supervised Learning , we are going to split this into training and testing data. 
+```{r}
+library(caret)
+intrain <- createDataPartition(y = click, p= 0.7, list = FALSE)
+training <-advert[intrain,]
+testing <- advert[-intrain,]
+```
+#### Check the sizes of the split test and train sets
+```{r}
+# We check the dimensions of out training data.frame and testing data.frame
+# ---
+# 
+dim(training); 
+dim(testing);
+#We can see our data in divided as shown below.
+```
+#### We need to confirm if still our converted datatypes are still the same using Structure. 
+
+```{r}
+str(advert)
+```
+#### Clicked on Ad is a factor. 
+#### Noow we can train our  SVM Model. We will implement this through the trainControl() method. This will allow us to use the train() function provided by the caret package. 
+#### cross-validation.We are using setting number =10 and repeats =4
+
+```{r}
+
+trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 3)
+```
+
+```{r}
+
+svm_Linear = train(click ~., data = training, method = "svmLinear",
+trControl=trctrl,
+preProcess = c("center", "scale"),
+tuneLength = 5)
+```
+####2. KNN
+##### KNN is a classification and regression algorithm. In case of classification, new data points get classified in a particular class on the basis of voting from nearest neighbors and in case of regression, new data get labeled based on the averages of nearest value.
+#### It is a Non - parametric algorithm. It is a Classification and both Regrression. 
+
+
+##### This algorithms segregates unlabeled data points into well defined groups. * The principle behind nearest neighbour methods is to find a predefined number of training samples closest in distance to the new point, and predict the label from these. 
+
+##### First we want our chosen Random numbers to be the same after each sample.
+```{r}
+set.seed(1234)
+````
+
+```{r}
+advert_subset <- advert[c('Daily.Time.Spent.on.Site','Age','Area.Income', 'Daily.Internet.Usage', 'Male','Clicked.on.Ad')]
+
+#check its head
+head(advert_subset)
+```
+
+
+```{r}
+]
+
+```
+
+
+
+```{r}
+
+
+```
+##### # Normalizing the numerical variables of the data set. Normalizing the numerical values is really effective for algorithms,  as it provides a measure from 0 to 1 which corresponds to min value to the max value of the data column. We define a normal function which will normalize the set of values according to its minimum value and maximum value.
+```{r}
+dim(advert_subset)
+```
+
+```{r}
+
+normal <- function(x) {((x - min(x)) /(max(x)-min(x))) }
+
+```
+#### Apply the normalize on the function
+
+```{r}
+advert_subset = as.data.frame(lapply(advert[-6],normal))
+advert_subset
+```
+
+
+```{r}
+as.da
+```
+
+#### 3.Regression Analysis in R.
+```{r}
+# Applying the lm() function.
+multiple_lm <- lm(click ~ ., advert_subset)
+
+```
+
+```{r}
+# Generating the anova table
+anova(multiple_lm)
+```
+
+```{r}
+# Then performing our prediction 
+pred1 <- predict(multiple_lm, advert)
+
+
+# Printing out our result
+pred1
+
+
+
+```
+#### Linear regression part 2
+
+```{r}
+plot(input)
+#We will plot Input data 
+``` 
+
+
+
+
+```{r}
+input <- advert[,c("Daily.Time.Spent.on.Site","Age","Area.Income", "Daily.Internet.Usage","Clicked.on.Ad")]
+head(input)
+
+
+```
+
+
+```{r}
+# Creating the relationship model
+
+
+model <- lm(click ~ time + age + area_income + daily_internet, data = input)
+summary(model)
+#our values for  P- value , Adjusted R and , R Squared are appropriate hence we can fit a line.
+
+
+```
+#### 4. Naive Bayes
+
+##### Naïve Bayes classifiers are a family of simple "probabilistic classifiers" based on applying Bayes' theorem with strong independence assumptions between the features.
+
+```{r}
+#We will need to install some dependencies for working with Naive Bayes.
+install.packages('tidyverse')
+library(tidyverse)
+
+install.packages('ggplot2')
+library(ggplot2)
+
+install.packages('caret')
+library(caret)
+
+install.packages('caretEnsemble')
+library(caretEnsemble)
+
+install.packages('psych')
+library(psych)
+
+install.packages('Amelia')
+library(Amelia)
+
+install.packages('mice')
+library(mice)
+
+install.packages('GGally')
+library(GGally)
+
+install.packages('rpart')
+library(rpart)
+
+install.packages('randomForest')
+library(randomForest)
+```
+
+```{r}
+click  <- factor(click, levels = c(0,1), labels = c("No", "Yes"))
+head(click)
+
+
+
+```
+
+```{r}
+ggplot(advert, aes(age, colour = click)) +
+geom_freqpoly(binwidth = 1) + labs(title="Age Distribution by Click")
+
+```
+
+
+
+```{r}
+ggplot(advert, aes(daily_internet, colour = click)) +
+geom_freqpoly(binwidth = 1) + labs(title="Daily_internet Distribution by Click")
+
+
+```
+
+
+```{r}
+ggplot(advert, aes(area_income, colour = click)) +
+geom_freqpoly(binwidth = 1) + labs(title="Area_income Distribution by Click")
+
+
+```
+
+
+```{r}
+ggplot(advert, aes(time, colour = click)) +
+geom_freqpoly(binwidth = 1) + labs(title="Area_income Distribution by Click")
+
+
+
+```
+#### Splitting the data
+````{r}
+set.seed(234)
+library(caret)
+Splitting <- createDataPartition(y = click,p = 0.70,list = FALSE)
+training <- advert_subset[Splitting,]
+testing <- advert_subset[-Splitting,]
+
+
+````
+
+
+```{r}
+# Checking dimensions of the split
+
+prop.table(table(click)) * 100
+prop.table(table(training$Clicked.on.Ad)) * 100
+prop.table(table(testing$Clicked.on.Ad)) * 100
+
+
+```
+# Comparing the outcome of the training and testing phase
+# ---
+# Creating objects x which holds the predictor variables and y which holds the response variables
+# ---
+#
+```{r}
+x = training[,]
+y = training$Clicked.on.Ad
+
+``` 
+
+```{r}
+model = train(x,y,'nb',trControl=trainControl(method='cv',number=10))
+
+
+```
+
+
+```{r}
+# Model Evaluation
+# ---
+# Predicting our testing set
+# 
+Predict <- predict(model,newdata = testing )
+
+# Getting the confusion matrix to see accuracy value and other parameter values
+# ---
+# 
+confusionMatrix(Predict, testing$Clicked.on.Ad )
+```
+
+####5.  Decision Trees
+##### A decision tree is a decision support tool that uses a tree-like model of decisions and their possible consequences, including chance event outcomes, resource costs, and utility. It is one way to display an algorithm that only contains conditional control statements.
+
+```{r}
+set.seed(1234)
+```
+
+
+```{r}
+advert$click <- as.factor(advert$click)
+ind_variables = advert[,c(1,2,3,4,7,10)]
+```
+
+Splitting the data
+```{r}
+partition <- createDataPartition (y = click , p = 0.7, list = FALSE)
+train <-ind_variables[partition]
+test <-ind_variables[-partition]
+```
+
+````{r}
+my_grid <-expand.grid(mtry =sqrt(ncol(advert)),
+                      splitrule= c("gini", "extratrees"),
+                      min.node.size = 25)
+```
+
+```{r}
+dt_model <- train(click~ ., data =train , method = "ranger", tunegrid = my_grid, 
+                  trControl = trainControl(method= 'repeatedcv', numbers = 10, repeats =3,
+                                           search = 'random', verboselter = FALSE))
+```
+
+
+```{r}
+dt_model
+plot(dt_model)
+```
+ Make predictions 
+```{r}
+dt_pred <- predict(dt_model,test)
+
+```
+Check accuracy
+```{r}
+cm_dt = confusionMatrix(table(dt_pred, test$click))
+cm_dt 
+```
+
+# 7. challenge the model
+
+#### 1. 
+USe the most accurate model for the machine learning models
+
